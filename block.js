@@ -2,10 +2,10 @@ const crypto = require("crypto");
 const { diff } = require("util");
 
 class Block {
-    constructor(index, timestamp, data, previousHash = "") {
+    constructor(index, timestamp, transactions, previousHash = "") {
         this.index = index;
         this.timestamp = timestamp;
-        this.data = data;
+        this.transactions = transactions;
         this.nonce = 0;
         this.previousHash = previousHash;
         this.hash = this.calculateHash();
@@ -16,7 +16,8 @@ class Block {
         return crypto.createHash("sha256")
             .update(
                 this.index + this.timestamp
-                + JSON.stringify(this.data) + this.previousHash
+                + JSON.stringify(this.transactions)
+                + this.previousHash
                 + this.nonce
             )
             .digest("hex");
@@ -29,6 +30,16 @@ class Block {
             this.hash = this.calculateHash();
         }
 
+    }
+
+    hasValidTransactions() {
+        for (const tx of this.transactions) {
+            if (!tx.isValid()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }
