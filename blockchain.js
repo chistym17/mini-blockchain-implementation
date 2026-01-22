@@ -13,7 +13,7 @@ class Blockchain {
     creategenesisblock() {
         return new Block(
             0,
-            new Date.toString(),
+            new Date().toISOString(),
             [],
             "0"
 
@@ -55,6 +55,16 @@ class Blockchain {
         if (!transaction.isValid())
             throw new Error("Transaction not valid")
 
+        if (transaction.amount <= 0)
+            throw new Error("Transaction amount must be greater than 0")
+
+        const senderBalance = this.getBalanceofAddress(transaction.fromAddress)
+
+        if (senderBalance < transaction.amount) {
+            throw new Error("Not enough balance")
+
+        }
+
         this.pendingTransactions.push(transaction);
 
     }
@@ -73,6 +83,24 @@ class Blockchain {
 
         this.pendingTransactions = [];
 
+    }
+
+    getBalanceOfAddress(address) {
+        let balance = 0;
+        for (const block of this.chain) {
+            for (const tx of block.transactions) {
+                if (tx.fromAddress === address) {
+                    balance -= tx.amount;
+                }
+
+                if (tx.toAddress === address) {
+                    balance += tx.amount;
+                }
+
+            }
+        }
+
+        return balance;
     }
 
 
